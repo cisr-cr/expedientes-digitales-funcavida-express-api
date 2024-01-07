@@ -1,0 +1,24 @@
+const express = require("express");
+const app = express();
+require("dotenv").config();
+const { connectDB } = require("./config/db");
+const apiRoutes = require("./routes/apiRoutes");
+
+// Connect to MongoDB
+connectDB()
+  .then(() => {
+    // Middleware setup
+    app.use(express.json());
+
+    // Mounting routes
+    app.use("/api", apiRoutes);
+
+    // Server setup
+    const PORT = process.env.PORT;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
