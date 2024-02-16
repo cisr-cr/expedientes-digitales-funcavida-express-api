@@ -16,3 +16,19 @@ exports.getEndpoint = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.postEndpoint = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+    // Use the extracted ID and updated data to update the expediente
+    const updatedExpediente = await ExpedienteModel.updateExpedienteById(
+      id,
+      updatedData
+    );
+
+    res.json(updatedExpediente);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
