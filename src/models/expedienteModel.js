@@ -21,10 +21,27 @@ async function updateExpedienteById(id, updatedData) {
     const db = require("../config/db").getDB(); // Get the database dynamically
     const collection = db.collection("expedientes");
 
+    // Recursive function to traverse the updatedData object and construct $set object
+    const constructSetObject = (obj, path = "") => {
+      const $set = {};
+      for (const key in obj) {
+        if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
+          const nestedSet = constructSetObject(obj[key], `${path}${key}.`);
+          Object.assign($set, nestedSet);
+        } else {
+          $set[`${path}${key}`] = obj[key];
+        }
+      }
+      return $set;
+    };
+
+    // Construct $set object recursively
+    const $set = constructSetObject(updatedData);
+
     // Use the provided ID to update the specific expediente
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },
-      { $set: updatedData }
+      { $set }
     );
 
     if (result.modifiedCount === 0) {
@@ -40,7 +57,21 @@ async function updateExpedienteById(id, updatedData) {
   }
 }
 
+async function deleteExpedienteById(id) {
+  try {
+    const db = require("../config/db").getDB(); // Get the database dynamically
+    const collection = db.collection("expedientes");
+    // Use the provided ID to delete the specific expediente
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    return result;
+  } catch (error) {
+    console.error("Error deleting data from MongoDB:", error);
+    throw error;
+  }
+}
+
 module.exports = {
   fetchExpedienteById,
   updateExpedienteById,
+  deleteExpedienteById,
 };
