@@ -11,7 +11,12 @@ connectDB()
     // Middleware setup
     app.use(express.json());
     //CORS
-    app.use(cors());
+    app.use(
+      cors({
+        origin: "*",
+        methods: ["GET", "POST"],
+      })
+    );
 
     // Mounting routes
     app.use("/api", apiRoutes);

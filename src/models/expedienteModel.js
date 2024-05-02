@@ -1,3 +1,11 @@
+//Get GCLOUD Bucket
+const { storage } = require("./../config/firebase");
+const {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} = require("firebase/storage");
+
 // Function to fetch expediente from MongoDB by ID
 const { ObjectId } = require("mongodb");
 
@@ -57,6 +65,29 @@ async function updateExpedienteById(id, updatedData) {
   }
 }
 
+async function updateFotoExpedienteById(id, file) {
+  try {
+    const metadata = {
+      contentType: file.mimetype,
+    };
+
+    const storageRef = ref(storage, id);
+    const uploadTask = await uploadBytesResumable(
+      storageRef,
+      file.buffer,
+      metadata
+    );
+
+    const downloadURL = await getDownloadURL(uploadTask.ref);
+
+    const updatedData = { InformacionPaciente: { Foto: downloadURL } };
+    return updateExpedienteById(id, updatedData);
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+}
+
 async function deleteExpedienteById(id) {
   try {
     const db = require("../config/db").getDB(); // Get the database dynamically
@@ -74,4 +105,5 @@ module.exports = {
   fetchExpedienteById,
   updateExpedienteById,
   deleteExpedienteById,
+  updateFotoExpedienteById,
 };
